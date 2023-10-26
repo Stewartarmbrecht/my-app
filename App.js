@@ -1,3 +1,5 @@
+import 'core-js/full/symbol/async-iterator';
+
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -7,13 +9,20 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
-import {API, graphqlOperation} from 'aws-amplify';
+import {API, DataStore, graphqlOperation} from 'aws-amplify';
 import {createTodo} from './src/graphql/mutations';
 import {listTodos} from './src/graphql/queries';
+import {Todo} from './src/models/index';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
 Amplify.configure(awsExports);
+
+import { ExpoSQLiteAdapter } from '@aws-amplify/datastore-storage-adapter/ExpoSQLiteAdapter';
+
+DataStore.configure({
+  storageAdapter: ExpoSQLiteAdapter
+});
 
 const initialState = {name: '', description: ''};
 
@@ -31,11 +40,13 @@ const App = () => {
 
   async function fetchTodos() {
     try {
-      const todoData = await API.graphql(graphqlOperation(listTodos));
-      const todos = todoData.data.listTodos.items;
+      //const todoData = await API.graphql(graphqlOperation(listTodos));
+      const todos = await DataStore.query(Todo);
+      //const todos = todoData.data.listTodos.items;
       setTodos(todos);
+      console.log('Set Todos', todos);
     } catch (err) {
-      console.log('error fetching todos');
+      console.log('error fetching todos', err);
     }
   }
 
@@ -45,9 +56,26 @@ const App = () => {
       const todo = {...formState};
       setTodos([...todos, todo]);
       setFormState(initialState);
-      await API.graphql(graphqlOperation(createTodo, {input: todo}));
+      //await API.graphql(graphqlOperation(createTodo, {input: todo}));
+      await DataStore.save(new Todo(todo));
     } catch (err) {
       console.log('error creating todo:', err);
+    }
+  }
+
+  async function sync() {
+    try {
+      setTodos([]);
+      console.log('Stopping');
+      await DataStore.stop();
+      console.log('Clearing');
+      await DataStore.clear();
+      console.log('Starting');
+      await DataStore.start();
+      console.log('Fetching');
+      fetchTodos();
+    } catch (err) {
+      console.log('error syncing:', err);
     }
   }
 
@@ -68,6 +96,12 @@ const App = () => {
         />
         <Pressable onPress={addTodo} style={styles.buttonContainer}>
           <Text style={styles.buttonText}>Create todo</Text>
+        </Pressable>
+        <Pressable onPress={sync} style={styles.buttonContainer}>
+          <Text style={styles.buttonText}>Sync</Text>
+        </Pressable>
+        <Pressable onPress={fetchTodos} style={styles.buttonContainer}>
+          <Text style={styles.buttonText}>Refresh</Text>
         </Pressable>
         {todos.map((todo, index) => (
           <View key={todo.id ? todo.id : index} style={styles.todo}>
