@@ -9,10 +9,8 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
-import {API, DataStore, graphqlOperation} from 'aws-amplify';
-import {createTodo} from './src/graphql/mutations';
-import {listTodos} from './src/graphql/queries';
-import {Todo} from './src/models/index';
+import {DataStore} from 'aws-amplify';
+import {LazyTodo, Todo} from './src/models/index';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
@@ -24,11 +22,11 @@ DataStore.configure({
   storageAdapter: ExpoSQLiteAdapter
 });
 
-const initialState = {name: '', description: ''};
+const initialState: Todo = new Todo({name: '', description: ''});
 
 const App = () => {
-  const [formState, setFormState] = useState(initialState);
-  const [todos, setTodos] = useState([]);
+  const [formState, setFormState] = useState<LazyTodo>(initialState);
+  const [todos, setTodos] = useState<LazyTodo[]>([]);
 
   useEffect(() => {
     fetchTodos();
@@ -91,7 +89,7 @@ const App = () => {
         <TextInput
           onChangeText={value => setInput('description', value)}
           style={styles.input}
-          value={formState.description}
+          value={formState.description ?? undefined}
           placeholder="Description"
         />
         <Pressable onPress={addTodo} style={styles.buttonContainer}>
@@ -121,6 +119,7 @@ const styles = StyleSheet.create({
   todo: {marginBottom: 15},
   input: {backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18},
   todoName: {fontSize: 20, fontWeight: 'bold'},
+  todoDescription: {fontSize: 20, fontWeight: 'bold'},
   buttonContainer: {
     alignSelf: 'center',
     backgroundColor: 'black',
