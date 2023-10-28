@@ -108,16 +108,10 @@ const App = () => {
         <Pressable onPress={addTodo} style={styles.buttonContainer}>
           <Text style={styles.buttonText}>Create todo</Text>
         </Pressable>
-        <Pressable onPress={sync} style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>Sync</Text>
-        </Pressable>
-        <Pressable onPress={fetchTodos} style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>Refresh</Text>
-        </Pressable>
         {todos.map((todo, index) => (
           <View key={todo.id} style={styles.todo}>
             <Text style={styles.todoName}>{todo.name}</Text>
-            <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonContainer}>
+            <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonDeleteContainer}>
               <Text style={styles.buttonText}>Delete</Text>
             </Pressable>
           </View>
@@ -133,12 +127,18 @@ const styles = StyleSheet.create({
   container: {width: 400, flex: 1, padding: 20, alignSelf: 'center'},
   todo: {marginBottom: 15, flexDirection: 'row'},
   input: {backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18},
-  todoName: {fontSize: 20, fontWeight: 'bold'},
+  todoName: {fontSize: 20, fontWeight: 'bold', flex: 1},
   todoDescription: {fontSize: 20, fontWeight: 'bold'},
   buttonContainer: {
     alignSelf: 'center',
     backgroundColor: 'black',
     paddingHorizontal: 8,
+  },
+  buttonDeleteContainer: {
+    alignSelf: 'center',
+    backgroundColor: 'black',
+    margin: 8,
+    borderRadius: 8,
   },
   buttonText: {color: 'white', padding: 16, fontSize: 18},
 });
