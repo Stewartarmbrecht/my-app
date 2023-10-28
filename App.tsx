@@ -9,8 +9,9 @@ import {
   Pressable,
   SafeAreaView,
 } from 'react-native';
-import {DataStore} from 'aws-amplify';
+import {API, DataStore, SortDirection, graphqlOperation} from 'aws-amplify';
 import {LazyTodo, Todo} from './src/models/index';
+import {listTodos} from './src/graphql/queries';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
@@ -25,24 +26,32 @@ DataStore.configure({
 const initialState: Todo = new Todo({name: '', description: ''});
 
 const App = () => {
-  const [formState, setFormState] = useState<LazyTodo>(initialState);
-  const [todos, setTodos] = useState<LazyTodo[]>([]);
+  const [formState, setFormState] = useState<{name: string}>(initialState);
+  const [todos, setTodos] = useState<{id: string, name: string}[]>([]);
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
-  function setInput(key, value) {
+  function setInput(key: string, value: string) {
     setFormState({...formState, [key]: value});
   }
 
   async function fetchTodos() {
     try {
+      const subscription = DataStore.observeQuery(
+        Todo
+      ).subscribe(snapshot => {
+        const { items, isSynced } = snapshot;
+        setTodos(items);
+        console.log(`[Snapshot] item count: ${items.length}, isSynced: ${isSynced}`);
+      });
+
       //const todoData = await API.graphql(graphqlOperation(listTodos));
-      const todos = await DataStore.query(Todo);
       //const todos = todoData.data.listTodos.items;
-      setTodos(todos);
-      console.log('Set Todos', todos);
+      //const todos = await DataStore.query(Todo);
+      //setTodos(todos);
+      //console.log('Set Todos', todos);
     } catch (err) {
       console.log('error fetching todos', err);
     }
@@ -50,12 +59,9 @@ const App = () => {
 
   async function addTodo() {
     try {
-      if (!formState.name || !formState.description) return;
-      const todo = {...formState};
-      setTodos([...todos, todo]);
-      setFormState(initialState);
+      if (!formState.name) return;
       //await API.graphql(graphqlOperation(createTodo, {input: todo}));
-      await DataStore.save(new Todo(todo));
+      await DataStore.save(new Todo({ name: formState.name }));
     } catch (err) {
       console.log('error creating todo:', err);
     }
@@ -71,9 +77,22 @@ const App = () => {
       console.log('Starting');
       await DataStore.start();
       console.log('Fetching');
-      fetchTodos();
+      await fetchTodos();
     } catch (err) {
       console.log('error syncing:', err);
+    }
+  }
+
+  async function deleteTodo(id: string) {
+    try {
+      const toDelete = await DataStore.query(Todo, id);
+      if (toDelete) {
+        DataStore.delete(toDelete);
+      }
+      console.log('Deleted');
+      await fetchTodos();
+    } catch (err) {
+      console.log('error deleting', err);
     }
   }
 
@@ -86,12 +105,6 @@ const App = () => {
           value={formState.name}
           placeholder="Name"
         />
-        <TextInput
-          onChangeText={value => setInput('description', value)}
-          style={styles.input}
-          value={formState.description ?? undefined}
-          placeholder="Description"
-        />
         <Pressable onPress={addTodo} style={styles.buttonContainer}>
           <Text style={styles.buttonText}>Create todo</Text>
         </Pressable>
@@ -102,9 +115,11 @@ const App = () => {
           <Text style={styles.buttonText}>Refresh</Text>
         </Pressable>
         {todos.map((todo, index) => (
-          <View key={todo.id ? todo.id : index} style={styles.todo}>
+          <View key={todo.id} style={styles.todo}>
             <Text style={styles.todoName}>{todo.name}</Text>
-            <Text style={styles.todoDescription}>{todo.description}</Text>
+            <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonContainer}>
+              <Text style={styles.buttonText}>Delete</Text>
+            </Pressable>
           </View>
         ))}
       </View>
@@ -116,7 +131,7 @@ export default App;
 
 const styles = StyleSheet.create({
   container: {width: 400, flex: 1, padding: 20, alignSelf: 'center'},
-  todo: {marginBottom: 15},
+  todo: {marginBottom: 15, flexDirection: 'row'},
   input: {backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18},
   todoName: {fontSize: 20, fontWeight: 'bold'},
   todoDescription: {fontSize: 20, fontWeight: 'bold'},
