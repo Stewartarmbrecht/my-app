@@ -8,10 +8,14 @@ import {
   TextInput,
   Pressable,
   SafeAreaView,
+  Button,
 } from 'react-native';
-import {API, DataStore, SortDirection, graphqlOperation} from 'aws-amplify';
-import {LazyTodo, Todo} from './src/models/index';
-import {listTodos} from './src/graphql/queries';
+import {DataStore} from 'aws-amplify';
+import {Todo} from './src/models/index';
+import {
+  useAuthenticator,
+  withAuthenticator,
+} from '@aws-amplify/ui-react-native';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
@@ -24,6 +28,11 @@ DataStore.configure({
 });
 
 const initialState: Todo = new Todo({name: '', description: ''});
+
+function SignOutButton() {
+  const { signOut } = useAuthenticator();
+  return <Button onPress={signOut} title="Sign Out" />;
+}
 
 const App = () => {
   const [formState, setFormState] = useState<{name: string}>(initialState);
@@ -99,6 +108,7 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
+        <SignOutButton />
         <TextInput
           onChangeText={value => setInput('name', value)}
           style={styles.input}
@@ -108,7 +118,7 @@ const App = () => {
         <Pressable onPress={addTodo} style={styles.buttonContainer}>
           <Text style={styles.buttonText}>Create todo</Text>
         </Pressable>
-        {todos.map((todo, index) => (
+        {todos.map((todo) => (
           <View key={todo.id} style={styles.todo}>
             <Text style={styles.todoName}>{todo.name}</Text>
             <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonDeleteContainer}>
@@ -121,7 +131,7 @@ const App = () => {
   );
 };
 
-export default App;
+export default withAuthenticator(App);
 
 const styles = StyleSheet.create({
   container: {width: 400, flex: 1, padding: 20, alignSelf: 'center'},
