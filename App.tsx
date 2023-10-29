@@ -12,10 +12,10 @@ import {
 } from 'react-native';
 import {DataStore} from 'aws-amplify';
 import {Todo} from './src/models/index';
-import {
-  useAuthenticator,
-  withAuthenticator,
-} from '@aws-amplify/ui-react-native';
+// import {
+//   useAuthenticator,
+//   withAuthenticator,
+// } from '@aws-amplify/ui-react-native';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
@@ -29,10 +29,10 @@ DataStore.configure({
 
 const initialState: Todo = new Todo({name: '', description: ''});
 
-function SignOutButton() {
-  const { signOut } = useAuthenticator();
-  return <Button onPress={signOut} title="Sign Out" />;
-}
+// function SignOutButton() {
+//   const { signOut } = useAuthenticator();
+//   return <Button onPress={signOut} title="Sign Out" />;
+// }
 
 const App = () => {
   const [formState, setFormState] = useState<{name: string}>(initialState);
@@ -108,7 +108,7 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
-        <SignOutButton />
+        {/* <SignOutButton /> */}
         <TextInput
           onChangeText={value => setInput('name', value)}
           style={styles.input}
@@ -131,7 +131,8 @@ const App = () => {
   );
 };
 
-export default withAuthenticator(App);
+//export default withAuthenticator(App);
+export default App;
 
 const styles = StyleSheet.create({
   container: {width: 400, flex: 1, padding: 20, alignSelf: 'center'},
