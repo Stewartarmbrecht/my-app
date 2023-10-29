@@ -1,6 +1,6 @@
 import 'core-js/full/symbol/async-iterator';
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,13 @@ import {
   SafeAreaView,
   Button,
 } from 'react-native';
-import {DataStore} from 'aws-amplify';
-import {Todo} from './src/models/index';
-// import {
-//   useAuthenticator,
-//   withAuthenticator,
-// } from '@aws-amplify/ui-react-native';
+import { DataStore } from 'aws-amplify';
+import { Todo } from './src/models/index';
+import {
+  Authenticator,
+  useAuthenticator,
+  withAuthenticator,
+} from '@aws-amplify/ui-react-native';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './src/aws-exports';
@@ -27,7 +28,7 @@ DataStore.configure({
   storageAdapter: ExpoSQLiteAdapter
 });
 
-const initialState: Todo = new Todo({name: '', description: ''});
+const initialState: Todo = new Todo({ name: '', description: '' });
 
 // function SignOutButton() {
 //   const { signOut } = useAuthenticator();
@@ -35,15 +36,15 @@ const initialState: Todo = new Todo({name: '', description: ''});
 // }
 
 const App = () => {
-  const [formState, setFormState] = useState<{name: string}>(initialState);
-  const [todos, setTodos] = useState<{id: string, name: string}[]>([]);
+  const [formState, setFormState] = useState<{ name: string }>(initialState);
+  const [todos, setTodos] = useState<{ id: string, name: string }[]>([]);
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
   function setInput(key: string, value: string) {
-    setFormState({...formState, [key]: value});
+    setFormState({ ...formState, [key]: value });
   }
 
   async function fetchTodos() {
@@ -106,28 +107,33 @@ const App = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        {/* <SignOutButton /> */}
-        <TextInput
-          onChangeText={value => setInput('name', value)}
-          style={styles.input}
-          value={formState.name}
-          placeholder="Name"
-        />
-        <Pressable onPress={addTodo} style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>Create todo</Text>
-        </Pressable>
-        {todos.map((todo) => (
-          <View key={todo.id} style={styles.todo}>
-            <Text style={styles.todoName}>{todo.name}</Text>
-            <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonDeleteContainer}>
-              <Text style={styles.buttonText}>Delete</Text>
+    <Authenticator.Provider>
+      <Authenticator>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.container}>
+            {/* <SignOutButton /> */}
+            <TextInput
+              onChangeText={value => setInput('name', value)}
+              style={styles.input}
+              value={formState.name}
+              placeholder="Name"
+            />
+            <Pressable onPress={addTodo} style={styles.buttonContainer}>
+              <Text style={styles.buttonText}>Create todo</Text>
             </Pressable>
+            {todos.map((todo) => (
+              <View key={todo.id} style={styles.todo}>
+                <Text style={styles.todoName}>{todo.name}</Text>
+                <Pressable onPress={() => { deleteTodo(todo.id) }} style={styles.buttonDeleteContainer}>
+                  <Text style={styles.buttonText}>Delete</Text>
+                </Pressable>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </Authenticator>
+    </Authenticator.Provider>
+
   );
 };
 
@@ -135,11 +141,11 @@ const App = () => {
 export default App;
 
 const styles = StyleSheet.create({
-  container: {width: 400, flex: 1, padding: 20, alignSelf: 'center'},
-  todo: {marginBottom: 15, flexDirection: 'row'},
-  input: {backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18},
-  todoName: {fontSize: 20, fontWeight: 'bold', flex: 1},
-  todoDescription: {fontSize: 20, fontWeight: 'bold'},
+  container: { width: 400, flex: 1, padding: 20, alignSelf: 'center' },
+  todo: { marginBottom: 15, flexDirection: 'row' },
+  input: { backgroundColor: '#ddd', marginBottom: 10, padding: 8, fontSize: 18 },
+  todoName: { fontSize: 20, fontWeight: 'bold', flex: 1 },
+  todoDescription: { fontSize: 20, fontWeight: 'bold' },
   buttonContainer: {
     alignSelf: 'center',
     backgroundColor: 'black',
@@ -151,5 +157,5 @@ const styles = StyleSheet.create({
     margin: 8,
     borderRadius: 8,
   },
-  buttonText: {color: 'white', padding: 16, fontSize: 18},
+  buttonText: { color: 'white', padding: 16, fontSize: 18 },
 });
