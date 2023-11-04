@@ -14,8 +14,6 @@ import { DataStore } from 'aws-amplify';
 import { Todo } from './src/models/index';
 import {
   Authenticator,
-  useAuthenticator,
-  withAuthenticator,
 } from '@aws-amplify/ui-react-native';
 
 import { Amplify } from 'aws-amplify';
