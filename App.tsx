@@ -1,3 +1,4 @@
+window.LOG_LEVEL = 'DEBUG';
 import 'core-js/full/symbol/async-iterator';
 
 import React, { useEffect, useState } from 'react';
