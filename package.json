@@ -2,9 +2,6 @@
     "private": true,
     "name": "monorepo",
     "version": "1.0.0",
-    "workspaces": {
-      "packages": ["apps/*", "packages/*"],
-      "nohoist": ["**/amplify", "**/amplify/**"]
-    }
+    "workspaces": ["apps/*", "packages/*"]
   }
   

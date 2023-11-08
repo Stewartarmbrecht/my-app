@@ -36,6 +36,6 @@
   },
   "private": true,
   "workspaces": {
-    "nohoist": ["**/amplify/**"]
+    "nohoist": ["**/aws-amplify", "**/aws-amplify/**", "**/@aws-amplify", "**/@aws-amplify/**"]
   }
 }
