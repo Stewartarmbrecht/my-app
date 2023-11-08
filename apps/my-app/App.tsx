@@ -1,4 +1,8 @@
 import 'core-js/full/symbol/async-iterator';
+import { Amplify, DataStore } from 'aws-amplify';
+import awsExports from './src/aws-exports';
+Amplify.configure(awsExports);
+
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -10,21 +14,17 @@ import {
   SafeAreaView,
   Button,
 } from 'react-native';
-import { DataStore } from 'aws-amplify';
+// import {
+//   Authenticator,
+// } from '@aws-amplify/ui-react-native';
+
 import { Todo } from './src/models/index';
-import {
-  Authenticator,
-} from '@aws-amplify/ui-react-native';
 
-import { Amplify } from 'aws-amplify';
-import awsExports from './src/aws-exports';
-Amplify.configure(awsExports);
+// import { ExpoSQLiteAdapter } from '@aws-amplify/datastore-storage-adapter/ExpoSQLiteAdapter';
 
-import { ExpoSQLiteAdapter } from '@aws-amplify/datastore-storage-adapter/ExpoSQLiteAdapter';
-
-DataStore.configure({
-  storageAdapter: ExpoSQLiteAdapter
-});
+// DataStore.configure({
+//   storageAdapter: ExpoSQLiteAdapter
+// });
 
 const initialState: Todo = new Todo({ name: '', description: '' });
 
@@ -47,13 +47,13 @@ const App = () => {
 
   async function fetchTodos() {
     try {
-      const subscription = DataStore.observeQuery(
-        Todo
-      ).subscribe(snapshot => {
-        const { items, isSynced } = snapshot;
-        setTodos(items);
-        console.log(`[Snapshot] item count: ${items.length}, isSynced: ${isSynced}`);
-      });
+      // const subscription = DataStore.observeQuery(
+      //   Todo
+      // ).subscribe(snapshot => {
+      //   const { items, isSynced } = snapshot;
+      //   setTodos(items);
+      //   console.log(`[Snapshot] item count: ${items.length}, isSynced: ${isSynced}`);
+      // });
 
       //const todoData = await API.graphql(graphqlOperation(listTodos));
       //const todos = todoData.data.listTodos.items;
@@ -69,7 +69,7 @@ const App = () => {
     try {
       if (!formState.name) return;
       //await API.graphql(graphqlOperation(createTodo, {input: todo}));
-      await DataStore.save(new Todo({ name: formState.name }));
+      //await DataStore.save(new Todo({ name: formState.name }));
     } catch (err) {
       console.log('error creating todo:', err);
     }
@@ -77,15 +77,15 @@ const App = () => {
 
   async function sync() {
     try {
-      setTodos([]);
-      console.log('Stopping');
-      await DataStore.stop();
-      console.log('Clearing');
-      await DataStore.clear();
-      console.log('Starting');
-      await DataStore.start();
-      console.log('Fetching');
-      await fetchTodos();
+      // setTodos([]);
+      // console.log('Stopping');
+      // await DataStore.stop();
+      // console.log('Clearing');
+      // await DataStore.clear();
+      // console.log('Starting');
+      // await DataStore.start();
+      // console.log('Fetching');
+      // await fetchTodos();
     } catch (err) {
       console.log('error syncing:', err);
     }
@@ -93,20 +93,20 @@ const App = () => {
 
   async function deleteTodo(id: string) {
     try {
-      const toDelete = await DataStore.query(Todo, id);
-      if (toDelete) {
-        DataStore.delete(toDelete);
-      }
-      console.log('Deleted');
-      await fetchTodos();
+      // const toDelete = await DataStore.query(Todo, id);
+      // if (toDelete) {
+      //   DataStore.delete(toDelete);
+      // }
+      // console.log('Deleted');
+      // await fetchTodos();
     } catch (err) {
       console.log('error deleting', err);
     }
   }
 
   return (
-    <Authenticator.Provider>
-      <Authenticator>
+    // <Authenticator.Provider>
+    //   <Authenticator>
         <SafeAreaView style={styles.container}>
           <View style={styles.container}>
             {/* <SignOutButton /> */}
@@ -129,8 +129,8 @@ const App = () => {
             ))}
           </View>
         </SafeAreaView>
-      </Authenticator>
-    </Authenticator.Provider>
+    //   </Authenticator>
+    // </Authenticator.Provider>
 
   );
 };
